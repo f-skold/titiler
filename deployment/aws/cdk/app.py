@@ -185,17 +185,18 @@ for key, value in {
     if value:
         core.Tag.add(app, key, value)
 
-ecs_stackname = f"{settings.name}-ecs-{settings.stage}"
-titilerECSStack(
-    app,
-    ecs_stackname,
-    cpu=settings.task_cpu,
-    memory=settings.task_memory,
-    mincount=settings.min_ecs_instances,
-    maxcount=settings.max_ecs_instances,
-    permissions=perms,
-    environment=settings.env,
-)
+if False:
+    ecs_stackname = f"{settings.name}-ecs-{settings.stage}"
+    titilerECSStack(
+        app,
+        ecs_stackname,
+        cpu=settings.task_cpu,
+        memory=settings.task_memory,
+        mincount=settings.min_ecs_instances,
+        maxcount=settings.max_ecs_instances,
+        permissions=perms,
+        environment=settings.env,
+    )
 
 lambda_stackname = f"{settings.name}-lambda-{settings.stage}"
 titilerLambdaStack(
