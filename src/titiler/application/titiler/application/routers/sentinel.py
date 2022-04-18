@@ -6,7 +6,7 @@ from titiler.custom.routing import apiroute_factory
 from titiler.dependencies import BandsExprParams
 from titiler.endpoints.factory import MosaicTilerFactory, MultiBandTilerFactory
 
-from ..dependencies import CustomPathParams, MosaicParams
+from titiler.dependencies_pds import CustomPathParams, MosaicParams
 
 from fastapi import APIRouter
 

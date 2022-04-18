@@ -9,7 +9,7 @@ from rio_tiler_pds.sentinel.utils import s2_sceneid_parser
 
 from titiler.dependencies import DefaultDependency
 
-from .settings import mosaic_config
+from .settings_pds import mosaic_config
 
 from fastapi import HTTPException, Query
 
