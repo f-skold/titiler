@@ -2,7 +2,7 @@
 
 __version__ = "0.7.0"
 
-from . import dependencies, errors, factory, routing, utils  # noqa
+from . import dependencies_pds, dependencies, errors, factory, routing, rt_sentinel, settings_pds, utils  # noqa
 from .factory import (  # noqa
     BaseTilerFactory,
     MultiBandTilerFactory,

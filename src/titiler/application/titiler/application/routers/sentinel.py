@@ -7,14 +7,16 @@ from titiler.dependencies import BandsExprParams
 from titiler.endpoints.factory import MosaicTilerFactory, MultiBandTilerFactory
 
 from titiler.dependencies_pds import CustomPathParams, MosaicParams
+from titiler.core.rt_sentinel import S2COGReaderFF
 
 from fastapi import APIRouter
 
 route_class = apiroute_factory({"AWS_NO_SIGN_REQUEST": "YES"})
 
 
+
 scenes = MultiBandTilerFactory(
-    reader=S2COGReader,
+    reader=S2COGReaderFF,
     path_dependency=CustomPathParams,
     router_prefix="scenes/sentinel",
     router=APIRouter(route_class=route_class),
