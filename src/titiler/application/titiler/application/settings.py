@@ -18,6 +18,12 @@ class ApiSettings(pydantic.BaseSettings):
 
     lower_case_query_parameters: bool = False
 
+    # mosaic
+    mosaic_backend: str = "backend"
+    mosaic_host: str = "hostname"
+    # format will be ignored for dynamodb backend
+    mosaic_format: str = ".json.gz"
+
     @pydantic.validator("cors_origins")
     def parse_cors_origin(cls, v):
         """Parse CORS origins."""

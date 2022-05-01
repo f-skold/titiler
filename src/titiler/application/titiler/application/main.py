@@ -4,7 +4,7 @@ import logging
 
 from titiler.application import __version__ as titiler_version
 from titiler.application.custom import templates
-from titiler.application.routers import cog, mosaic, stac, tms
+from titiler.application.routers import cog, mosaic, stac, tms, sentinel
 from titiler.application.settings import ApiSettings
 from titiler.core.errors import DEFAULT_STATUS_CODES, add_exception_handlers
 from titiler.core.middleware import (
@@ -45,6 +45,9 @@ if not api_settings.disable_stac:
 
 if not api_settings.disable_mosaic:
     app.include_router(mosaic.router, prefix="/mosaicjson", tags=["MosaicJSON"])
+    app.include_router(sentinel.mosaicjson.router, prefix="/mosaicjson/sentinel", tags=["Sentinel 2 COG"])
+
+app.include_router(sentinel.scenes.router, prefix="/scenes/sentinel", tags=["Sentinel 2 COG"])
 
 app.include_router(tms.router, tags=["TileMatrixSets"])
 add_exception_handlers(app, DEFAULT_STATUS_CODES)

@@ -13,6 +13,7 @@ inst_reqs = [
     "pydantic",
     "rasterio",
     "rio-tiler>=3.1,<3.2",
+    "rio-tiler-pds>=0.6",
     "simplejson",
     "importlib_resources>=1.1.0;python_version<'3.9'",
     "typing_extensions;python_version<'3.8'",

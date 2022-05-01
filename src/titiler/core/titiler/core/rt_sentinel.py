@@ -1,6 +1,8 @@
 
 """AWS Sentinel 2 readers."""
 
+import logging
+
 import json
 import re
 from collections import OrderedDict
@@ -32,6 +34,11 @@ default_l1c_bands = (
     "B8A",
 )
 
+actual_l1c_bands = (
+    "B03",
+    "B04",
+    "B08",
+)
 @attr.s
 class S2L2ACOGReaderFF(MultiBandReader):
     """Modded AWS Public Dataset Sentinel 2 L2A COGS reader.
@@ -68,44 +75,62 @@ class S2L2ACOGReaderFF(MultiBandReader):
     # "sentinel-cogs"
     hostname: str = attr.ib(default="sn-satellite")
     # prefix: str = attr.ib(default="sentinel-s2-{_levelLow}-cogs/{_utm}/{lat}/{sq}/{acquisitionYear}/{_month}/S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}")
-    prefix: str = attr.ib(default="s2_{acquisitionYear}_{_month}/33VWF,{acquisitionYear}-{acquisitionMonth}_{acquisitionDay},0")
+    prefix: str = attr.ib(default="s2_{acquisitionYear}_{acquisitionMonth}/{_utm}{lat}{sq},{acquisitionYear}-{acquisitionMonth}-{acquisitionDay},{num}")
 
     def __attrs_post_init__(self):
         """Fetch item.json and get bounds and bands."""
-        self.scene_params = s2_sceneid_parser(self.input)
+        # self.scene_params = s2_sceneid_parser(self.input)
+        self.scene_params = self.input.scene_metadata
 
-        cog_sceneid = "S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}".format(
-            **self.scene_params
-        )
-        prefix = self._prefix.format(**self.scene_params)
-        self.stac_item = json.loads(
-            get_object(
-                self._hostname, f"{prefix}/{cog_sceneid}.json", request_pays=True
+        #cog_sceneid = "S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}".format(
+        #    **self.scene_params
+        #)
+        prefix2 = self.prefix.format(**self.scene_params)
+        # log1.info(f"Hostanme, path: {self.hostname} {prefix2}/tileInfo.json")
+        self.bands = ""
+        self.crs =  WGS84_CRS
+        self.stac_item = None
+        self.tileInfo = None
+        try:
+            self.tileInfo = json.loads(
+                get_object(self.hostname, f"{prefix2}/tileInfo.json")
+                # , request_pays=True
             )
-        )
-        self.bounds = self.stac_item["bbox"]
-        self.crs = WGS84_CRS
 
-        self.bands = tuple(
-            [band for band in self.stac_item["assets"] if re.match("B[0-9A]{2}", band)]
-        )
+            self.datageom = self.tileInfo["tileDataGeometry"]
+            self.bounds = featureBounds(self.datageom)
+            self.crs = CRS.from_user_input(self.datageom["crs"]["properties"]["name"])
+
+            self.bands = actual_l1c_bands
+        except Exception:
+            log1 = logging.getLogger("uvicorn.error")
+            log1.error(f"Failed to read from S3:  {self.hostname}, {prefix2}/tileInfo.json")
+
 
     def _get_band_url(self, band: str) -> str:
         """Validate band name and return band's url."""
+        if "" == band:
+            return "hej"
         band = band if len(band) == 3 else f"B0{band[-1]}"
 
         if band not in self.bands:
             raise InvalidBandName(f"{band} is not valid.\nValid bands: {self.bands}")
 
-        prefix = self._prefix.format(**self.scene_params)
-        return f"{self._scheme}://{self._hostname}/{prefix}/{band}.tif"
+        prefix = self.prefix.format(**self.scene_params)
+        return f"{self._scheme}://{self.hostname}/{prefix}/{band}.tif"
 
 
 def S2COGReaderFF(sceneid: str, **kwargs: Any) -> S2L2ACOGReaderFF:
     """Modded Sentinel-2 COG readers."""
-    scene_params = s2_sceneid_parser(sceneid)
+    log1 = logging.getLogger("uvicorn.error")
+    # log1.info(f"Dump sceneid: {sceneid}")
+    scene_params = sceneid.scene_metadata
     level = scene_params["processingLevel"]
-    if level == "L2A":
-        return S2L2ACOGReaderFF(sceneid, **kwargs)
+    if level in ["L2A", "L1C"]:
+        try:
+            return S2L2ACOGReaderFF(sceneid, **kwargs)
+        except Exception:
+            return "Strange"
     else:
+        log1.error(f"{level} is not supported, {sceneid}")
         raise Exception(f"{level} is not supported")

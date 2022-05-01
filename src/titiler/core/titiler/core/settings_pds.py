@@ -6,8 +6,9 @@ import pydantic
 class MosaicSettings(pydantic.BaseSettings):
     """Application settings"""
 
-    backend: str
-    host: str
+    # Defaults?
+    backend: str = "backend"
+    host: str = "hostname"
     # format will be ignored for dynamodb backend
     format: str = ".json.gz"
 
