@@ -73,9 +73,13 @@ class S2L2ACOGReaderFF(MultiBandReader):
     _scheme: str = "s3"
 
     # "sentinel-cogs"
-    hostname: str = attr.ib(default="sn-satellite")
+    # hostname: str = attr.ib(default="sn-satellite")
+    hostname: str = attr.ib(default="requester-pays-sn-sat")
     # prefix: str = attr.ib(default="sentinel-s2-{_levelLow}-cogs/{_utm}/{lat}/{sq}/{acquisitionYear}/{_month}/S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}")
-    prefix: str = attr.ib(default="s2_{acquisitionYear}_{acquisitionMonth}/{_utm}{lat}{sq},{acquisitionYear}-{acquisitionMonth}-{acquisitionDay},{num}")
+    # prefix: str = attr.ib(default="s2_{acquisitionYear}_{acquisitionMonth}/{_utm}{lat}{sq},{acquisitionYear}-{acquisitionMonth}-{acquisitionDay},{num}")
+    # tiles/{_utm}/{lat}/{sq}/{acquisitionYear}/{_month}/{_day}/{num}
+    # prefix: str = attr.ib(default="sentinel-s2-l2a-cogs/{_utm}/{lat}/{sq}/{acquisitionYear}/{_month}/{_day}/{num}")
+    prefix: str = attr.ib(default="sentinel-s2-{_levelLow}-cogs/{_utm}/{lat}/{sq}/{acquisitionYear}/{_month}/S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}")
 
     def __attrs_post_init__(self):
         """Fetch item.json and get bounds and bands."""
