@@ -86,9 +86,9 @@ class S2L2ACOGReaderFF(MultiBandReader):
         # self.scene_params = s2_sceneid_parser(self.input)
         self.scene_params = self.input.scene_metadata
 
-        #cog_sceneid = "S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}".format(
-        #    **self.scene_params
-        #)
+        cog_sceneid = "S{sensor}{satellite}_{_utm}{lat}{sq}_{acquisitionYear}{acquisitionMonth}{acquisitionDay}_{num}_{processingLevel}".format(
+            **self.scene_params
+        )
         prefix2 = self.prefix.format(**self.scene_params)
         # log1.info(f"Hostanme, path: {self.hostname} {prefix2}/tileInfo.json")
         self.bands = ""
@@ -97,8 +97,7 @@ class S2L2ACOGReaderFF(MultiBandReader):
         self.tileInfo = None
         try:
             self.tileInfo = json.loads(
-                get_object(self.hostname, f"{prefix2}/tileInfo.json")
-                # , request_pays=True
+                get_object(self.hostname, f"{prefix2}/{cog_sceneid}.json", request_pays=True)
             )
 
             self.datageom = self.tileInfo["tileDataGeometry"]
@@ -108,7 +107,7 @@ class S2L2ACOGReaderFF(MultiBandReader):
             self.bands = actual_l1c_bands
         except Exception:
             log1 = logging.getLogger("uvicorn.error")
-            log1.error(f"Failed to read from S3:  {self.hostname}, {prefix2}/tileInfo.json")
+            log1.error(f"Failed to read from S3:  {self.hostname}, {prefix2}/{cog_sceneid}.json")
 
 
     def _get_band_url(self, band: str) -> str:
