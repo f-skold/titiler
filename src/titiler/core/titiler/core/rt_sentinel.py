@@ -5,6 +5,9 @@ import logging
 
 import json
 import re
+import os
+import sys
+import traceback
 from collections import OrderedDict
 from typing import Any, Dict, Sequence, Type, Union
 
@@ -18,6 +21,8 @@ from rio_tiler.errors import InvalidBandName
 from rio_tiler.io import COGReader, MultiBandReader
 from rio_tiler_pds.sentinel.utils import s2_sceneid_parser
 from rio_tiler_pds.utils import get_object
+
+from boto3.session import Session as boto3_session
 
 default_l1c_bands = (
     "B01",
@@ -106,10 +111,28 @@ class S2L2ACOGReaderFF(MultiBandReader):
             self.bounds = self.stac_item["bbox"]
             self.crs = WGS84_CRS
 
-            self.bands = actual_l1c_bands
-        except Exception:
+            self.bands = list(actual_l1c_bands)
+        except Exception as e1:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             log1 = logging.getLogger("uvicorn.error")
-            log1.error(f"Failed to read from S3:  {self.hostname}, {prefix2}/{cog_sceneid}.json")
+            log1.error(f"EXCEPTION: {e1}")
+            log1.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+            log1.error(f"Failed to read from S3: {self.hostname}, {prefix2}/{cog_sceneid}.json")
+            none_text = "<None>"
+            ak = os.environ.get("AWS_ACCESS_KEY_ID", none_text)
+            sak = os.environ.get("AWS_SECRET_ACCESS_KEY", none_text)
+            if none_text != sak:
+                sak = sak[0:4] + "..." + sak[-4:]
+            log1.error(f"Environment check: {ak}, {sak}")
+            try:
+                session = boto3_session()
+                endpoint_url = None
+                sts_client = session.client("sts", endpoint_url=endpoint_url)
+                response1 = sts_client.get_caller_identity()
+                log1.error(f"sts_client.get_caller_identity returned: {response1}")
+                # response2 = client.get_access_key_info(AccessKeyId='')
+            except Exception as e2:
+                log1.error(f"Got exception whlile trying to debug session issue:  {e2}")
 
 
     def _get_band_url(self, band: str) -> str:
