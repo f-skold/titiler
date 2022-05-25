@@ -96,13 +96,15 @@ class S2L2ACOGReaderFF(MultiBandReader):
         self.stac_item = None
         self.tileInfo = None
         try:
-            self.tileInfo = json.loads(
+            self.stac_item = json.loads(
                 get_object(self.hostname, f"{prefix2}/{cog_sceneid}.json", request_pays=True)
             )
 
-            self.datageom = self.tileInfo["tileDataGeometry"]
-            self.bounds = featureBounds(self.datageom)
-            self.crs = CRS.from_user_input(self.datageom["crs"]["properties"]["name"])
+            # self.datageom = self.tileInfo["tileDataGeometry"]
+            # self.bounds = featureBounds(self.datageom)
+            # self.crs = CRS.from_user_input(self.datageom["crs"]["properties"]["name"])
+            self.bounds = self.stac_item["bbox"]
+            self.crs = WGS84_CRS
 
             self.bands = actual_l1c_bands
         except Exception:
