@@ -34,7 +34,7 @@ class titilerLambdaStack(Stack):
         id: str,
         memory: int = 1024,
         timeout: int = 30,
-        runtime: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_11,
+        runtime: aws_lambda.Runtime = aws_lambda.Runtime.PYTHON_3_12,
         concurrent: Optional[int] = None,
         permissions: Optional[List[iam.PolicyStatement]] = None,
         environment: Optional[Dict] = None,

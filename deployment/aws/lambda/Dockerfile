@@ -1,11 +1,13 @@
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.12
 
 FROM --platform=linux/amd64 public.ecr.aws/lambda/python:${PYTHON_VERSION}
 
 WORKDIR /tmp
 
 # Install system dependencies to compile (numexpr)
-RUN yum install -y gcc-c++
+# RUN yum install -y gcc-c++
+RUN dnf install -y gcc-c++ 
+RUN dnf install -y expat expat-devel
 
 RUN python -m pip install pip -U
 RUN python -m pip install "titiler.application==0.21.1" "mangum>=0.10.0" -t /asset --no-binary pydantic
@@ -18,7 +20,8 @@ RUN find /asset -type d -a -name 'tests' -print0 | xargs -0 rm -rf
 RUN rm -rdf /asset/numpy/doc/ /asset/boto3* /asset/botocore* /asset/bin /asset/geos_license /asset/Misc
 
 # Remove system dependencies
-RUN yum remove -y gcc-c++
+RUN dnf remove -y gcc-c++
+# RUN yum remove -y gcc-c++
 
 COPY lambda/handler.py /asset/handler.py
 
